@@ -12,7 +12,7 @@ function App() {
   }, []);
 
   return (
-    <div>
+    <div >
       <HealthMonitorWidget/>
       {/* <h1>MMW Desktop Component</h1>
       <pre>{JSON.stringify(data, null, 2)}</pre> */}
