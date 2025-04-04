@@ -433,3 +433,273 @@
 .retry-message {
   animation: pulse 2s infinite;
 }
+
+
+/* Desktop Widget Base */
+.desktop-widget {
+  transition: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 100vw;
+  max-height: 100vh;
+  background-color: #EFF6FF;
+  font-size: 14px; /* Base font size */
+}
+
+/* Resize handle */
+.resize-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 12px;
+  height: 12px;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 50%, #1D4ED8 50%);
+  border-bottom-right-radius: 8px;
+  z-index: 1010;
+}
+
+/* Style adjustments for widget when being interacted with */
+.desktop-widget:hover {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+}
+
+.desktop-widget:active {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* Widget header adjustments for drag functionality */
+.desktop-widget .widget-header {
+  position: relative;
+  cursor: grab;
+  user-select: none;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #DBEAFE;
+}
+
+.desktop-widget .widget-header:active {
+  cursor: grabbing;
+}
+
+.desktop-widget .header-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #1E40AF;
+  margin: 0;
+}
+
+.desktop-widget .header-time {
+  font-size: 12px;
+  color: #1D4ED8;
+}
+
+/* Widget controls */
+.widget-controls {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.control-button {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.5);
+  font-weight: bold;
+}
+
+.minimize-button {
+  background-color: #ECC94B; /* yellow-400 */
+}
+
+/* Minimized state */
+.widget-body.minimized {
+  display: none;
+}
+
+/* Responsive grid layout */
+.widget-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+  padding: 8px;
+}
+
+/* Card styles */
+.widget-card {
+  background-color: white;
+  padding: 10px;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.card-label {
+  font-size: 12px;
+  color: #3B82F6;
+  font-weight: 500;
+}
+
+/* Metrics styling */
+.metrics-container {
+  display: flex;
+  align-items: flex-end;
+  margin-top: 4px;
+}
+
+.metric-value {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.metric-unit {
+  margin-left: 4px;
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+
+.metric-status {
+  margin-left: 6px;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: white;
+}
+
+/* Assessment and body visualization */
+.body-visualization-container {
+  padding: 0 8px 8px 8px;
+}
+
+.body-visualization {
+  background-color: white;
+  padding: 10px;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+}
+
+.human-silhouette {
+  position: relative;
+  width: 3rem;
+  height: 4.5rem;
+}
+
+.assessment {
+  margin-left: 10px;
+  flex: 1;
+}
+
+.assessment-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #1D4ED8;
+}
+
+.assessment-details {
+  margin-top: 2px;
+  font-size: 11px;
+  color: #475569;
+}
+
+/* Responsive adjustments */
+@media (max-width: 350px) {
+  .widget-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .human-silhouette {
+    width: 2.5rem;
+    height: 4rem;
+  }
+}
+
+@media (min-width: 350px) and (max-width: 450px) {
+  .widget-content {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 450px) {
+  .desktop-widget {
+    font-size: 16px;
+  }
+  
+  .desktop-widget .header-title {
+    font-size: 16px;
+  }
+  
+  .desktop-widget .header-time {
+    font-size: 14px;
+  }
+  
+  .card-label {
+    font-size: 14px;
+  }
+  
+  .metric-value {
+    font-size: 22px;
+  }
+  
+  .metric-unit {
+    font-size: 14px;
+  }
+  
+  .assessment-title {
+    font-size: 14px;
+  }
+  
+  .assessment-details {
+    font-size: 12px;
+  }
+}
+
+/* User left state */
+.user-left-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.user-left-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+  opacity: 0.5;
+}
+
+.user-left-message h3 {
+  font-size: 18px;
+  color: #e53e3e;
+  margin-bottom: 8px;
+}
+
+.user-left-message p {
+  color: #718096;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.retry-message {
+  font-size: 12px;
+  color: #a0aec0;
+  margin-top: 10px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
