@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
-import HealthMonitorWidget from './components/health';
+// import HealthMonitorWidget from './components/health';
+import HealthWidget from './components/Health2';
+
 
 function App() {
   const [data, setData] = useState(null);
@@ -13,7 +15,11 @@ function App() {
 
   return (
     <div >
-      <HealthMonitorWidget/>
+      {/* <HealthMonitorWidget/> */}
+      {/* <HealthMonitoringWidget/>  */}
+      <HealthWidget size="small" />
+{/* <HealthWidget size="medium" />
+<HealthWidget size="large" /> */}
       {/* <h1>MMW Desktop Component</h1>
       <pre>{JSON.stringify(data, null, 2)}</pre> */}
     </div>
