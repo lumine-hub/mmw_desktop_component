@@ -1,37 +1,66 @@
 import { useState, useEffect } from 'react';
-import { Heart, Activity, Bed } from 'lucide-react';
+import { Heart, Activity, Smile, Frown, Meh } from 'lucide-react';
+import healthMonitorApi from '../request/api';  // 添加这行
 
-export default function HealthMonitoringWidget() {
-  // 模拟实时数据
+export default function HealthMonitoringWidget({ isMock = true, uid = '12345' }) {  // 添加props
   const [healthData, setHealthData] = useState({
     heartRate: 72,
-    breathing: 'normal', // 'normal' 或 'abnormal'
-    heartRhythm: 'normal', // 'normal' 或 'abnormal'
-    bodyMovement: 'inBed', // 'inBed', 'outOfBed', 或 'rolling'
+    breathing: 'normal',
+    heartRhythm: 'normal',
+    stress: 80,
+    emotion: 'happy', // 替换体动状态为情绪状态
   });
 
-  // 模拟数据更新
+  // 更新useEffect
   useEffect(() => {
-    const interval = setInterval(() => {
-      setHealthData({
-        heartRate: Math.floor(Math.random() * 20) + 65, // 65-85之间的随机数
-        breathing: Math.random() > 0.8 ? 'abnormal' : 'normal',
-        heartRhythm: Math.random() > 0.9 ? 'abnormal' : 'normal',
-        bodyMovement: ['inBed', 'outOfBed', 'rolling'][Math.floor(Math.random() * 3)],
-      });
-    }, 3000);
+    let interval;
+
+    if (isMock) {
+      // 模拟数据更新逻辑
+      interval = setInterval(() => {
+        setHealthData(prev => ({
+          ...prev,
+          heartRate: Math.floor(Math.random() * 20) + 65,
+          breathing: Math.random() > 0.8 ? 'abnormal' : 'normal',
+          heartRhythm: Math.random() > 0.9 ? 'abnormal' : 'normal',
+          stress: Math.floor(Math.random() * 100) + 1,
+          emotion: (() => {
+            const rand = Math.random();
+            if (rand < 0.5) return 'happy';
+            if (rand < 0.8) return 'neutral';
+            return 'sad';
+          })(),
+        }));
+      }, 3000);
+    } else {
+      // 真实数据更新逻辑
+      interval = setInterval(async () => {
+        try {
+          const healthInfo = await healthMonitorApi.getHealthInfo(uid);
+          setHealthData({
+            heartRate: healthInfo.heartRate,
+            breathing: healthInfo.breathingStatus,
+            heartRhythm: healthInfo.arrhythmia ? 'abnormal' : 'normal',
+            stress: healthInfo.stress,
+            emotion: healthInfo.emotion || 'happy', // 替换体动状态为情绪状态
+          });
+        } catch (error) {
+          console.error('Error fetching health info:', error);
+        }
+      }, 3000);
+    }
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isMock, uid]);
 
-  // 获取体动状态对应的文本
-  const getMovementText = (movement) => {
+  // 获取情绪状态对应的文本
+  const getEmotionText = (emotion) => {
     const texts = {
-      inBed: '在床',
-      outOfBed: '离床',
-      rolling: '翻滚'
+      happy: '愉悦',
+      neutral: '平静',
+      sad: '低落'
     };
-    return texts[movement] || '未知';
+    return texts[emotion] || '未知';
   };
 
   return (
@@ -107,46 +136,27 @@ export default function HealthMonitoringWidget() {
           </div>
         </div>
 
-        {/* 体动状态 */}
+        {/* 情绪状态 */}
         <div className="bg-yellow-50 flex flex-col items-center justify-center border border-yellow-100 shadow-sm">
           <div className="flex items-center justify-center mb-2">
-            {healthData.bodyMovement === 'inBed' && (
-              <Bed className="text-indigo-500" size={28} />
+            {healthData.emotion === 'happy' && (
+              <Smile className="text-green-500" size={28} />
             )}
-            {healthData.bodyMovement === 'outOfBed' && (
-              <Activity className="text-orange-500" size={28} />
+            {healthData.emotion === 'neutral' && (
+              <Meh className="text-blue-500" size={28} />
             )}
-            {healthData.bodyMovement === 'rolling' && (
-              <svg 
-                width="28" 
-                height="28" 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                xmlns="http://www.w3.org/2000/svg"
-                className="text-yellow-500"
-              >
-                <path 
-                  d="M15 15L12 12M12 12L9 9M12 12L9 15M12 12L15 9" 
-                  stroke="currentColor" 
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-                <path 
-                  d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" 
-                  stroke="currentColor" 
-                  strokeWidth="2"
-                />
-              </svg>
+            {healthData.emotion === 'sad' && (
+              <Frown className="text-red-500" size={28} />
             )}
           </div>
           <div className="text-sm font-medium text-gray-600">
-            体动状态
+            情绪状态
           </div>
           <div className={`text-sm font-bold mt-1 
-            ${healthData.bodyMovement === 'inBed' ? 'text-indigo-500' : 
-              healthData.bodyMovement === 'outOfBed' ? 'text-orange-500' : 'text-yellow-600'}`
+            ${healthData.emotion === 'happy' ? 'text-green-500' : 
+              healthData.emotion === 'neutral' ? 'text-blue-500' : 'text-red-500'}`
           }>
-            {getMovementText(healthData.bodyMovement)}
+            {getEmotionText(healthData.emotion)}
           </div>
         </div>
       </div>

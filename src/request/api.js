@@ -25,16 +25,16 @@ const healthMonitorApi = {
     try {
       const response = await api.get(`/hr/getWaveform/uid/${uid}`);
       const result = handleResponse(response);
-      
+
       if (result.userLeft) {
         return { value: null, userLeft: true };
       }
-      
+
       // Extract the last heart rate value from the waveform array
       if (result.data.heart_waveform && result.data.heart_waveform.length > 0) {
-        return { 
-          value: result.data.heart_waveform[result.data.heart_waveform.length - 1], 
-          userLeft: false 
+        return {
+          value: result.data.heart_waveform[result.data.heart_waveform.length - 1],
+          userLeft: false
         };
       }
       return { value: null, userLeft: false };
@@ -43,45 +43,45 @@ const healthMonitorApi = {
       return { value: null, userLeft: false };
     }
   },
-  
+
   // Get arrhythmia status
   getArrhythmiaStatus: async (uid) => {
     try {
       const response = await api.get(`/arr/getWaveform/uid/${uid}`);
       const result = handleResponse(response);
-      
+
       if (result.userLeft) {
         return { value: false, userLeft: true };
       }
-      
+
       // Convert numeric value to boolean
       // 0 = false, 1 = true, -1 = noise (we'll treat noise as false for simplicity)
-      return { 
-        value: result.data.isArrhythmia === 1, 
-        userLeft: false 
+      return {
+        value: result.data.isArrhythmia === 1,
+        userLeft: false
       };
     } catch (error) {
       console.error('Error fetching arrhythmia status:', error);
       return { value: false, userLeft: false };
     }
   },
-  
+
   // Get body status
   getBodyStatus: async (uid) => {
     try {
       const response = await api.get(`/humov/getStatus/uid/${uid}`);
       const result = handleResponse(response);
-      
+
       if (result.userLeft) {
-        return { 
-          status: 'User Left', 
-          isWarning: false, 
+        return {
+          status: 'User Left',
+          isWarning: false,
           warningInfo: 'User has left the monitoring area',
           warningId: null,
-          userLeft: true 
+          userLeft: true
         };
       }
-      
+
       // Map the status code to a readable string
       let statusText = 'Unknown';
       switch (result.data.status) {
@@ -100,7 +100,7 @@ const healthMonitorApi = {
         default:
           statusText = 'Unknown';
       }
-      
+
       return {
         status: statusText,
         isWarning: result.data.isWarning,
@@ -119,28 +119,28 @@ const healthMonitorApi = {
       };
     }
   },
-  
+
   // Get breathing status
   getBreathingStatus: async (uid) => {
     try {
       const response = await api.get(`/br/getWarning/uid/${uid}`);
       const result = handleResponse(response);
-      
+
       if (result.userLeft) {
-        return { 
-          status: 'User Left', 
+        return {
+          status: 'User Left',
           isInBed: false,
-          userLeft: true 
+          userLeft: true
         };
       }
-      
+
       let breathingStatus = 'Normal';
       if (result.data.breath_warning_id === 21) {
         breathingStatus = 'Apnea';
       } else if (result.data.breath_warning_id === 22) {
         breathingStatus = 'COPD';
       }
-      
+
       return {
         status: breathingStatus,
         isInBed: result.data.is_in_bed,
@@ -154,7 +154,30 @@ const healthMonitorApi = {
         userLeft: false
       };
     }
-  }
+  },
+
+  // 获取人体存在状态
+  getHumanExist: async (uid) => {
+    try {
+      const response = await api.get(`/deskcomponent/getHumanExist/uid/${uid}`);
+      const result = handleResponse(response);
+
+      if (result.userLeft) {
+        return { status: null, userLeft: true };
+      }
+
+      return {
+        status: result.data.status,
+        userLeft: false
+      };
+    } catch (error) {
+      console.error('Error fetching human exist status:', error);
+      return { status: 4, userLeft: false }; // 默认返回"始终在"状态
+    }
+  },
+
+  // 获取健康信息
+
 };
 
 export default healthMonitorApi;

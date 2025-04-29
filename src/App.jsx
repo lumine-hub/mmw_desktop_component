@@ -1,65 +1,42 @@
 import { useEffect, useState } from 'react';
-// import HealthMonitorWidget from './components/health';
 import HealthWidget from './components/Health2';
-
+import ScreenController from './components/ScreenController';
 
 function App() {
   const [data, setData] = useState(null);
+  const [uid, setUid] = useState(null);
 
   useEffect(() => {
-    fetch('/api/data')  // 通过代理访问后端
+    // 从 URL 获取 uid 参数
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const uidFromUrl = urlParams.get('uid');
+
+    // 处理 uid：如果能获取到并且是有效数字则使用，否则使用默认值 '12345'
+    if (uidFromUrl !== null) {
+      const parsedUid = Number(uidFromUrl);
+      setUid(isNaN(parsedUid) ? '12345' : String(parsedUid));
+    } else {
+      setUid('12345'); // 默认值
+    }
+
+    // 获取数据
+    fetch('/api/data')
       .then(response => response.json())
       .then(data => setData(data))
       .catch(error => console.error('Error fetching data:', error));
   }, []);
 
   return (
-    <div >
-      {/* <HealthMonitorWidget/> */}
-      {/* <HealthMonitoringWidget/>  */}
-      <HealthWidget size="small" />
-{/* <HealthWidget size="medium" />
-<HealthWidget size="large" /> */}
-      {/* <h1>MMW Desktop Component</h1>
-      <pre>{JSON.stringify(data, null, 2)}</pre> */}
+    <div>
+      {uid && (
+        <>
+          <HealthWidget size="small" uid={uid} />
+          <ScreenController uid={uid} />
+        </>
+      )}
     </div>
   );
 }
 
 export default App;
-
-// import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
-// import './App.css'
-
-// function App() {
-//   const [count, setCount] = useState(0)
-
-//   return (
-//     <>
-//       <div>
-//         <a href="https://vite.dev" target="_blank">
-//           <img src={viteLogo} className="logo" alt="Vite logo" />
-//         </a>
-//         <a href="https://react.dev" target="_blank">
-//           <img src={reactLogo} className="logo react" alt="React logo" />
-//         </a>
-//       </div>
-//       <h1>Vite + React</h1>
-//       <div className="card">
-//         <button onClick={() => setCount((count) => count + 1)}>
-//           count is {count}
-//         </button>
-//         <p>
-//           Edit <code>src/App.jsx</code> and save to test HMR
-//         </p>
-//       </div>
-//       <p className="read-the-docs">
-//         Click on the Vite and React logos to learn more
-//       </p>
-//     </>
-//   )
-// }
-
-// export default App
