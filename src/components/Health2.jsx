@@ -1,17 +1,46 @@
 import { useState, useEffect } from 'react';
-import { Heart, Activity, Smile, Frown, Meh } from 'lucide-react';
-import healthMonitorApi from '../request/api';  // 添加这行
+import { Heart, Smile, Frown, Meh } from 'lucide-react';
+import healthMonitorApi from '../request/api';
 
-export default function HealthMonitoringWidget({ isMock = true, uid = '12345' }) {  // 添加props
+export default function HealthMonitoringWidget({ isMock = false, uid = '12' }) {
   const [healthData, setHealthData] = useState({
     heartRate: 72,
     breathing: 'normal',
+    breathingDetail: '正常',
     heartRhythm: 'normal',
+    heartRhythmDetail: '正常',
     stress: 80,
-    emotion: 'happy', // 替换体动状态为情绪状态
+    emotion: 'happy',
   });
 
-  // 更新useEffect
+  // 获取呼吸状态文本
+  const getBreathingStatus = (status) => {
+    switch (status) {
+      case 1:
+        return { status: 'normal', detail: '正常' };
+      case 2:
+        return { status: 'abnormal', detail: '空气阻塞' };
+      case 3:
+        return { status: 'abnormal', detail: '呼吸暂停' };
+      case 4:
+        return { status: 'unknown', detail: '未知' };
+      default:
+        return { status: 'unknown', detail: '未知' };
+    }
+  };
+
+  // 获取心律状态文本
+  const getHeartRhythmStatus = (status) => {
+    switch (status) {
+      case 1:
+        return { status: 'normal', detail: '正常' };
+      case 2:
+        return { status: 'abnormal', detail: '非正常' };
+      default:
+        return { status: 'unknown', detail: '未知' };
+    }
+  };
+
   useEffect(() => {
     let interval;
 
@@ -22,7 +51,9 @@ export default function HealthMonitoringWidget({ isMock = true, uid = '12345' })
           ...prev,
           heartRate: Math.floor(Math.random() * 20) + 65,
           breathing: Math.random() > 0.8 ? 'abnormal' : 'normal',
+          breathingDetail: Math.random() > 0.8 ? '异常' : '正常',
           heartRhythm: Math.random() > 0.9 ? 'abnormal' : 'normal',
+          heartRhythmDetail: Math.random() > 0.9 ? '非正常' : '正常',
           stress: Math.floor(Math.random() * 100) + 1,
           emotion: (() => {
             const rand = Math.random();
@@ -34,20 +65,34 @@ export default function HealthMonitoringWidget({ isMock = true, uid = '12345' })
       }, 3000);
     } else {
       // 真实数据更新逻辑
-      interval = setInterval(async () => {
+      const fetchData = async () => {
         try {
           const healthInfo = await healthMonitorApi.getHealthInfo(uid);
-          setHealthData({
-            heartRate: healthInfo.heartRate,
-            breathing: healthInfo.breathingStatus,
-            heartRhythm: healthInfo.arrhythmia ? 'abnormal' : 'normal',
-            stress: healthInfo.stress,
-            emotion: healthInfo.emotion || 'happy', // 替换体动状态为情绪状态
-          });
+          console.log('API Response:', healthInfo);
+          if (healthInfo && !healthInfo.userLeft) {
+            const breathingStatus = getBreathingStatus(healthInfo.breath_status);
+            const heartRhythmStatus = getHeartRhythmStatus(healthInfo.arr);
+            
+            setHealthData({
+              heartRate: healthInfo.heart || 72,
+              breathing: breathingStatus.status,
+              breathingDetail: breathingStatus.detail,
+              heartRhythm: heartRhythmStatus.status,
+              heartRhythmDetail: heartRhythmStatus.detail,
+              stress: healthInfo.stress || 80,
+              emotion: healthInfo.stress < 40 ? 'happy' : healthInfo.stress < 70 ? 'neutral' : 'sad'
+            });
+          }
         } catch (error) {
           console.error('Error fetching health info:', error);
         }
-      }, 3000);
+      };
+
+      // 立即执行一次
+      fetchData();
+      
+      // 设置定时器
+      interval = setInterval(fetchData, 3000);
     }
 
     return () => clearInterval(interval);
@@ -88,7 +133,11 @@ export default function HealthMonitoringWidget({ isMock = true, uid = '12345' })
               viewBox="0 0 24 24" 
               fill="none" 
               xmlns="http://www.w3.org/2000/svg"
-              className={healthData.breathing === 'normal' ? 'text-blue-500' : 'text-amber-500'}
+              className={`${
+                healthData.breathing === 'normal' ? 'text-blue-500' : 
+                healthData.breathing === 'abnormal' ? 'text-amber-500' : 
+                'text-gray-500'
+              }`}
               stroke="currentColor"
               strokeWidth="1.5"
               strokeLinecap="round"
@@ -103,8 +152,12 @@ export default function HealthMonitoringWidget({ isMock = true, uid = '12345' })
           <div className="text-sm font-medium text-gray-600">
             呼吸状态
           </div>
-          <div className={`text-sm font-bold mt-1 ${healthData.breathing === 'normal' ? 'text-blue-500' : 'text-amber-500'}`}>
-            {healthData.breathing === 'normal' ? '正常' : '异常'}
+          <div className={`text-sm font-bold mt-1 ${
+            healthData.breathing === 'normal' ? 'text-blue-500' : 
+            healthData.breathing === 'abnormal' ? 'text-amber-500' : 
+            'text-gray-500'
+          }`}>
+            {healthData.breathingDetail}
           </div>
         </div>
 
@@ -117,7 +170,11 @@ export default function HealthMonitoringWidget({ isMock = true, uid = '12345' })
               viewBox="0 0 24 24" 
               fill="none" 
               xmlns="http://www.w3.org/2000/svg"
-              className={healthData.heartRhythm === 'normal' ? 'text-green-500' : 'text-red-500'}
+              className={`${
+                healthData.heartRhythm === 'normal' ? 'text-green-500' : 
+                healthData.heartRhythm === 'abnormal' ? 'text-red-500' : 
+                'text-gray-500'
+              }`}
             >
               <path 
                 d="M2 12h2l3.5-7 3 14L14 4l2.5 8H22" 
@@ -131,8 +188,12 @@ export default function HealthMonitoringWidget({ isMock = true, uid = '12345' })
           <div className="text-sm font-medium text-gray-600">
             心律状态
           </div>
-          <div className={`text-sm font-bold mt-1 ${healthData.heartRhythm === 'normal' ? 'text-green-500' : 'text-red-500'}`}>
-            {healthData.heartRhythm === 'normal' ? '正常' : '异常'}
+          <div className={`text-sm font-bold mt-1 ${
+            healthData.heartRhythm === 'normal' ? 'text-green-500' : 
+            healthData.heartRhythm === 'abnormal' ? 'text-red-500' : 
+            'text-gray-500'
+          }`}>
+            {healthData.heartRhythmDetail}
           </div>
         </div>
 

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import HealthWidget from './components/Health2';
-import ScreenController from './components/ScreenController';
 
 function App() {
   const [data, setData] = useState(null);
@@ -32,7 +31,6 @@ function App() {
       {uid && (
         <>
           <HealthWidget size="small" uid={uid} />
-          <ScreenController uid={uid} />
         </>
       )}
     </div>
